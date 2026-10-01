@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UoVT Library Energy Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
+        body { 
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px; 
+        }
+        .card { 
+            background: rgba(255, 255, 255, 0.96); 
+            backdrop-filter: blur(10px);
+            padding: 28px; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+            max-width: 440px; 
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+            position: relative;
+        }
+
+        /* Branding Headers */
+        .university-title {
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .library-title {
+            color: #0f172a;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        /* Interactive Door & Stickman Animation Frame */
+        .animation-box {
+            position: relative;
+            width: 160px;
+            height: 100px;
+            margin: 10px auto;
+            border-bottom: 3px solid #64748b;
+            overflow: hidden;
+        }
+        
+        /* Frame & Door */
+        .door-frame {
+            position: absolute;
+            right: 25px;
+            bottom: 0;
+            width: 40px;
+            height: 75px;
+            border: 3px solid #334155;
+            border-bottom: none;
+            background: #f1f5f9;
+        }
+        .door-panel {
+            width: 100%;
+            height: 100%;
+            background: #e2e8f0;
+            transform-origin: left;
+            transition: transform 1.2s ease-in-out;
+            position: relative;
+            border-left: 2px solid #94a3b8;
+        }
+        .door-panel::after {
+            content: '';
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            width: 5px;
+            height: 5px;
+            background: #0f172a;
+            border-radius: 50%;
+        }
+        .door-open {
+            transform: rotateY(-70deg);
+        }
+
+        /* Walking Man Icon */
+        .stick-man {
+            position: absolute;
+            bottom: 0;
+            left: -30px;
+            font-size: 38px;
+            animation: walkToDoor 2.5s infinite linear;
+        }
+
+        /* Energy Tip Box */
+        .energy-box {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid #10b981;
+            border-radius: 8px;
+            padding: 10px 14px;
+            text-align: left;
+            margin: 15px 0;
+        }
+        .energy-box h4 {
+            color: #047857;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .energy-box p {
+            color: #334155;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-top: 4px;
+        }
+
+        /* Alert Display */
+        .alert-box { 
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); 
+            color: white; 
+            padding: 14px; 
+            border-radius: 12px; 
+            font-weight: 600; 
+            font-size: 14px;
+            margin: 12px 0; 
+            box-shadow: 0 6px 15px rgba(239,68,68,0.25);
+        }
+
+        /* Progress Bar & Buttons */
+        .progress-container {
+            width: 100%;
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            height: 8px;
+            margin: 15px 0 8px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            transition: width 1s linear;
+        }
+        .timer-text { font-size: 12px; color: #64748b; font-weight: 600; }
+        
+        .btn-group { display: flex; gap: 12px; margin-top: 20px; }
+        .btn { 
+            flex: 1;
+            padding: 12px 18px; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            font-weight: 700; 
+            transition: all 0.2s ease;
+        }
+        .btn-yes { background: #10b981; color: white; }
+        .btn-yes:hover { background: #059669; transform: translateY(-2px); }
+        .btn-no { background: #ef4444; color: white; }
+        .btn-no:hover { background: #dc2626; transform: translateY(-2px); }
+        
+        .hidden { display: none; }
+        .result-icon { font-size: 55px; margin-bottom: 10px; }
+
+        /* Keyframes */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes walkToDoor {
+            0% { left: -20px; opacity: 0; }
+            20% { opacity: 1; }
+            70% { left: 80px; }
+            100% { left: 80px; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="university-title">UoVT Energy Saver</div>
+    <div class="library-title">Library Door Monitor</div>
+
+    <!-- Animated Door & Walking Person -->
+    <div class="animation-box">
+        <div class="stick-man">🚶‍♂️</div>
+        <div class="door-frame">
+            <div class="door-panel door-open" id="interactive-door"></div>
+        </div>
+    </div>
+
+    <!-- Energy Management Fact Section -->
+    <div class="energy-box">
+        <h4>⚡ Why Close the Door?</h4>
+        <p>An open library door leads to severe cool-air loss from A/C units, increasing compressor work and raising power usage by up to <b>30%</b>.</p>
+    </div>
+
+    <div id="step1">
+        <div class="alert-box">
+            Please CLOSE the door after entering / exiting!
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+        <div class="timer-text">Checking status confirmation in <span id="seconds">20</span>s...</div>
+    </div>
+
+    <div id="step2" class="hidden">
+        <h3 style="color: #1e293b; font-size: 18px; margin-bottom: 6px;">Status Confirmation</h3>
+        <p style="color: #64748b; font-size: 14px;">Did you close the library door properly?</p>
+        <div class="btn-group">
+            <button class="btn btn-yes" onclick="sendResponse('yes')">YES 👍</button>
+            <button class="btn btn-no" onclick="sendResponse('no')">NO 👎</button>
+        </div>
+    </div>
+
+    <div id="step3" class="hidden">
+        <div id="status-icon" class="result-icon"></div>
+        <h3 id="response-title" style="font-size: 20px;"></h3>
+        <p id="response-message" style="margin-top: 8px; font-size: 14px; color: #475569;"></p>
+    </div>
+</div>
+
+<script>
+    fetch('/api/log', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: 'scan'})
+    });
+
+    let secondsLeft = 20;
+    const progressBar = document.getElementById('progress');
+    const door = document.getElementById('interactive-door');
+    
+    const countdown = setInterval(() => {
+        secondsLeft--;
+        document.getElementById('seconds').innerText = secondsLeft;
+        progressBar.style.width = (secondsLeft / 20 * 100) + '%';
+        
+        if (secondsLeft <= 0) {
+            clearInterval(countdown);
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+        }
+    }, 1000);
+
+    function sendResponse(answer) {
+        fetch('/api/log', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: answer})
+        });
+
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step3').classList.remove('hidden');
+
+        if (answer === 'yes') {
+            // Close the visual door animation upon user confirmation
+            door.classList.remove('door-open');
+            document.getElementById('status-icon').innerText = "🌿";
+            document.getElementById('response-title').innerText = "Thank You!";
+            document.getElementById('response-title').style.color = "#10b981";
+            document.getElementById('response-message').innerText = "Your effort helps UoVT maintain effective climate control and conserve energy!";
+        } else {
+            document.getElementById('status-icon').innerText = "⚠️";
+            document.getElementById('response-title').innerText = "Action Required!";
+            document.getElementById('response-title').style.color = "#ef4444";
+            document.getElementById('response-message').innerText = "Please turn back and close the door now to prevent cooling loss.";
+        }
+    }
+</script>
+
+</body>
+</html>
